@@ -1,3 +1,14 @@
+## 0.2.0 (2026-02-18)
+
+### Feat
+
+- add datasets automatic download
+
+### Refactor
+
+- format files
+- define constants module
+
 ## 0.1.0 (2026-02-18)
 
 ### Feat
