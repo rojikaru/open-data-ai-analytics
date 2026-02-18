@@ -43,9 +43,9 @@ def map_koatuu_to_region(koatuu_code: int) -> str:
     first_pass = koatuu_mapping.get(int(koatuu_level_1), None)
     if first_pass is not None:
         return first_pass
-    
+
     # Try to map using first digit only if 1, 5 or 7
-    if (koatuu_level_1[0] in {"1", "5", "7"}):
+    if koatuu_level_1[0] in {"1", "5", "7"}:
         return koatuu_mapping.get(int(koatuu_level_1[0]), "Unknown Region")
 
     return "Unknown Region"

@@ -12,7 +12,7 @@ def main():
     if data_df is None:
         print("Failed to load data.")
         return
-    
+
     print("Data loaded successfully:")
     print(data_df.head())
 
@@ -28,11 +28,11 @@ def main():
         ownership_by_region = vehicle_ownership_by_region(data_df)
         print(ownership_by_region)
 
-        # Visualize ownership by region
-        sns.barplot(data=ownership_by_region.to_pandas(), x="HUMAN_REGION", y="len")
-        sns.despine()
+    # Visualize ownership by region
+    sns.barplot(data=ownership_by_region.to_pandas(), x="HUMAN_REGION", y="len")
+    sns.despine()
 
-        plt.show()
+    plt.show()
 
 
 if __name__ == "__main__":
