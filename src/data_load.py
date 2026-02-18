@@ -4,8 +4,7 @@ import requests
 import shutil
 from os import listdir, mkdir, path
 
-
-RAW_DATA_ROOT = 'data/raw'
+from src.constants import RAW_DATA_ROOT
 
 
 def download_file(url: str, target_folder: str) -> str:
