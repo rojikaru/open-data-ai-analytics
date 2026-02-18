@@ -1,37 +1,72 @@
 import polars as pl
-from os import path, walk
+import requests
+
+import shutil
+from os import listdir, mkdir, path
 
 
-GUESSING_ROOT = 'data/raw/'
+RAW_DATA_ROOT = 'data/raw'
 
 
-def recursive_file_search(root_dir: str, extension: str = '.csv') -> list[str]:
+def download_file(url: str, target_folder: str) -> str:
     """
-    Recursively search for files with a specific extension in a given directory.
+    Download a file from a given URL and save it to a specified path.
 
-    Parameters:
-    root_dir (str): The root directory to start the search from.
-    extension (str): The file extension to look for (default is '.csv').
+    :param url (str): The URL of the file to download.
+    :param target_folder (str): The local folder where the downloaded file should be saved.
 
-    Returns:
-    list[str]: A list of file paths that match the specified extension.
+    :return (str): The path to the saved file.
     """
-    matching_files: list[str] = []
 
-    for root, dirs, files in walk(root_dir):
-        for file in files:
-            if file.endswith(extension):
-                matching_files.append(path.join(root, file))
-        for dir in dirs:
-            matching_files.extend(
-                recursive_file_search(path.join(root, dir), extension)
-)
+    file_name = url.split('/')[-1]
+    file_path = path.join(target_folder, file_name)
+    if path.exists(file_path):
+        return file_path
+    
+    response = requests.get(url)
+    if response.status_code != 200:
+        raise ValueError(f"Failed to download file from URL: {url}")
 
-    return matching_files
+    with open(file_path, 'wb') as f:
+        f.write(response.content)
+
+    return file_path
+
+
+def handle_maybe_zip_or_csv(file_path: str) -> str:
+    """
+    Handle a file that may be either a ZIP archive or a CSV file. 
+    If it's a ZIP archive, extract it and return the path to the contained CSV file.
+
+    :param file_path (str): The path to the file to handle.
+
+    :return (str): The path to the CSV file, whether it 
+    was directly provided or extracted from a ZIP archive.
+    """
+
+    if not file_path.endswith('.zip'):  
+        return file_path
+    
+    folder_name = path.splitext(path.basename(file_path))[0]
+    folder_path = path.join(
+        path.dirname(file_path),
+        folder_name
+    )
+
+    if not path.exists(folder_path):
+        shutil.unpack_archive(file_path, folder_path)
+
+    # Assuming the ZIP contains a single CSV file, find it
+    csv_files = [file for file in listdir(folder_path) if file.endswith('.csv')]
+    if not csv_files:
+        raise ValueError(f"No CSV file found in the ZIP archive: {file_path}")
+
+    return path.join(folder_path, csv_files[0])
 
 
 def load_data(
-        guessing_root: str = GUESSING_ROOT,
+        url: str,
+        clear_cache: bool = False,
         ignore_errors: bool = True,
         separator: str = ';',
         quote_char: str = '"',
@@ -39,7 +74,7 @@ def load_data(
     """
     Load data from a CSV file in guessing_root into a Polars DataFrame.
 
-    :param guessing_root (str): Where to start to look for a CSV using `os.walk()`
+    :param url (str): The URL or path to the CSV or ZIP file to load.
     :param ignore_errors (bool): Whether to ignore errors during CSV parsing (default is True).
     :param separator (str): The character used to separate fields in the CSV file (default is ';').
     :param quote_char (str): The character used to quote fields in the CSV file (default is '"').
@@ -48,21 +83,20 @@ def load_data(
     :rtype: pl.DataFrame | None
     """
 
-    # Guess the file path based on the current working directory
     current_dir = path.dirname(path.abspath(__file__))
-    guessing_root_abs = path.abspath(
-        path.join(current_dir, '..', guessing_root)
+    raw_data_root_abs = path.abspath(
+        path.join(current_dir, '..', RAW_DATA_ROOT)
     )
 
-    # Find all CSV files in the guessing root directory
-    csv_files = recursive_file_search(guessing_root_abs, extension='.csv')
+    if clear_cache:
+        shutil.rmtree(raw_data_root_abs)
 
-    if not csv_files:
-        print("No CSV files found in the guessing root directory.")
-        return None
+    # Ensure the raw data root directory exists
+    if not path.exists(raw_data_root_abs):
+        mkdir(raw_data_root_abs)
 
-    # Load the first CSV file found
-    file_path = csv_files[0]
+    downloaded_file_path = download_file(url, raw_data_root_abs)
+    file_path = handle_maybe_zip_or_csv(downloaded_file_path)
     print(f"Loading data from: {file_path}")
 
     return pl.read_csv(
