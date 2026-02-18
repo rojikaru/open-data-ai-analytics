@@ -56,3 +56,7 @@ uv run src/main.py
 - [uv project manager](https://docs.astral.sh/uv/#installation)
 - [Data.gov.ua - Open Data Portal of Ukraine](https://data.gov.ua/)
 - [Personal vehicles & their owners dataset](https://data.gov.ua/dataset/06779371-308f-42d7-895e-5a39833375f0)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
