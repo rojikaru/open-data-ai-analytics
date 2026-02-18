@@ -47,7 +47,7 @@ uv sync
 You can run the main analysis script using:
 
 ```bash
-uv run src/main.py
+uv run -m src.main
 ```
 
 ## References
