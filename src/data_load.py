@@ -22,12 +22,14 @@ def download_file(url: str, target_folder: str) -> str:
     if path.exists(file_path):
         return file_path
 
-    response = requests.get(url)
-    if response.status_code != 200:
+    stream = requests.get(url, stream=True, timeout=30)
+    if stream.status_code != 200:
         raise ValueError(f"Failed to download file from URL: {url}")
 
     with open(file_path, "wb") as f:
-        f.write(response.content)
+        for chunk in stream.iter_content(chunk_size=8192):
+            if chunk:
+                f.write(chunk)
 
     return file_path
 
@@ -57,6 +59,12 @@ def handle_maybe_zip_or_csv(file_path: str) -> str:
     if not csv_files:
         raise ValueError(f"No CSV file found in the ZIP archive: {file_path}")
 
+    if len(csv_files) > 1:
+        print(
+            f"Warning: multiple CSV files found in the ZIP archive '{file_path}'. "
+            f"Using first file: '{csv_files[0]}'"
+        )
+
     return path.join(folder_path, csv_files[0])
 
 
@@ -66,39 +74,42 @@ def load_data(
     ignore_errors: bool = True,
     separator: str = ";",
     quote_char: str = '"',
-) -> pl.DataFrame | None:
+) -> pl.DataFrame | Exception:
     """
-    Load data from a CSV file in guessing_root into a Polars DataFrame.
+    Load data from a URL into a Polars DataFrame.
 
     :param url (str): The URL or path to the CSV or ZIP file to load.
     :param ignore_errors (bool): Whether to ignore errors during CSV parsing (default is True).
     :param separator (str): The character used to separate fields in the CSV file (default is ';').
     :param quote_char (str): The character used to quote fields in the CSV file (default is '"').
 
-    :returns: The loaded data as a Polars DataFrame, or None if loading fails.
-    :rtype: pl.DataFrame | None
+    :returns: The loaded data as a Polars DataFrame, or an Exception if loading fails.
+    :rtype: pl.DataFrame | Exception
     """
 
     current_dir = path.dirname(path.abspath(__file__))
     raw_data_root_abs = path.abspath(path.join(current_dir, "..", RAW_DATA_ROOT))
 
-    if clear_cache:
+    if clear_cache and path.exists(raw_data_root_abs):
         shutil.rmtree(raw_data_root_abs)
 
     # Ensure the raw data root directory exists
     if not path.exists(raw_data_root_abs):
         mkdir(raw_data_root_abs)
 
-    downloaded_file_path = download_file(url, raw_data_root_abs)
-    file_path = handle_maybe_zip_or_csv(downloaded_file_path)
-    print(f"Loading data from: {file_path}")
+    try:
+        downloaded_file_path = download_file(url, raw_data_root_abs)
+        file_path = handle_maybe_zip_or_csv(downloaded_file_path)
+        print(f"Loading data from: {file_path}")
 
-    return pl.read_csv(
-        file_path,
-        ignore_errors=ignore_errors,
-        try_parse_dates=True,
-        truncate_ragged_lines=True,
-        low_memory=False,
-        separator=separator,
-        quote_char=quote_char,
-    )
+        return pl.read_csv(
+            file_path,
+            ignore_errors=ignore_errors,
+            try_parse_dates=True,
+            truncate_ragged_lines=True,
+            low_memory=False,
+            separator=separator,
+            quote_char=quote_char,
+        )
+    except Exception as ex:
+        return ex

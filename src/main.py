@@ -8,9 +8,9 @@ from src.analysis import most_common_vehicle_type, vehicle_ownership_by_region
 
 
 def main():
-    data_df = load_data(DATASET_URL, clear_cache=True)
-    if data_df is None:
-        print("Failed to load data.")
+    data_df = load_data(DATASET_URL, clear_cache=False)
+    if isinstance(data_df, Exception):
+        print(f"Failed to load data: {data_df}")
         return
 
     print("Data loaded successfully:")

@@ -28,21 +28,24 @@ def vehicle_ownership_by_region(
     status_column: str = "OPER_CODE",
 ) -> pl.DataFrame:
     """
-    Analyze vehicle ownership by region.
+    Analyze vehicle counts by region, filtered by operational status codes.
 
     :param vehicles_df (pl.DataFrame): A Polars DataFrame containing vehicle data.
-    :param region_column (str): The column name representing the region.
+    :param region_column (str): The column name representing the region (KOATUU code).
     :param new_region_column (str): The column name for the human-readable region after mapping.
     :param status_column (str): The column name representing the operational status.
-    :param target_codes (list[int]): The list of target operational codes to filter for.
+    :param target_codes (list[int]): The list of operational status codes to include in the analysis.
 
-    :return (pl.DataFrame): A DataFrame showing the count of owned vs. non-owned vehicles by region.
+    :return (pl.DataFrame): A DataFrame showing the count of vehicles
+    per region for the given operational status codes.
     """
 
     if target_codes is None:
+        # Default UA government codes for new and in-use vehicle acquisitions
         target_codes = [100, 105, 430]
 
     vehicle_acquiry_df = vehicles_df.filter(pl.col(status_column).is_in(target_codes))
+
     transform_koatuu_to_human = (
         pl.col(region_column)
         .map_elements(map_koatuu_to_region)
