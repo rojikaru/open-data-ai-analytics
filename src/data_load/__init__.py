@@ -22,16 +22,13 @@ def download_file(url: str, target_folder: str) -> str:
     if path.exists(file_path):
         return file_path
 
-    stream = requests.get(url, stream=True, timeout=30)
-    if stream.status_code != 200:
-        raise ValueError(f"Failed to download file from URL: {url}")
-
-    with open(file_path, "wb") as f:
-        for chunk in stream.iter_content(chunk_size=8192):
-            if chunk:
-                f.write(chunk)
-
-    return file_path
+    with requests.get(url, stream=True) as response:
+        response.raise_for_status()
+        with open(file_path, "wb") as f:
+            for chunk in response.iter_content(chunk_size=32768):
+                if chunk:
+                    f.write(chunk)
+        return file_path
 
 
 def handle_maybe_zip_or_csv(file_path: str) -> str:
@@ -78,7 +75,7 @@ def load_data(
     """
     Load data from a URL into a Polars DataFrame.
 
-    :param url (str): The URL or path to the CSV or ZIP file to load.
+    :param url (str): The URL of the CSV or ZIP file to load.
     :param ignore_errors (bool): Whether to ignore errors during CSV parsing (default is True).
     :param separator (str): The character used to separate fields in the CSV file (default is ';').
     :param quote_char (str): The character used to quote fields in the CSV file (default is '"').
@@ -87,8 +84,9 @@ def load_data(
     :rtype: pl.DataFrame | Exception
     """
 
+    # __file__ is now src/data_load/__init__.py — go up two levels to reach project root
     current_dir = path.dirname(path.abspath(__file__))
-    raw_data_root_abs = path.abspath(path.join(current_dir, "..", RAW_DATA_ROOT))
+    raw_data_root_abs = path.abspath(path.join(current_dir, "../..", RAW_DATA_ROOT))
 
     if clear_cache and path.exists(raw_data_root_abs):
         shutil.rmtree(raw_data_root_abs)
