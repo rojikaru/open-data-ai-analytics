@@ -60,12 +60,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Show Python version (system)
         run: python3 --version
 
-      # Install project deps using pip (uv may not be installed on self-hosted).
+      # Install project deps
       - name: Install project dependencies
         run: |
           python3 -m pip install --upgrade pip
