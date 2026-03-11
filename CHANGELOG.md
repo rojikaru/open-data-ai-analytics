@@ -1,3 +1,20 @@
+## 0.3.0 (2026-03-11)
+
+### Feat
+
+- **ci**: configure self-host runner
+- **ci**: configure cloud runner
+- split up project execution steps
+
+### Fix
+
+- **ci**: node.js 20 deprecation in actions/checkout
+
+### Refactor
+
+- improve error handling and documentation in data loading functions
+- format files
+
 ## 0.2.0 (2026-02-18)
 
 ### Feat
