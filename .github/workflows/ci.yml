@@ -1,0 +1,183 @@
+name: CI (modules)
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+    inputs:
+      module:
+        description: "Which module to run (or 'all')"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - data_load
+          - data_quality_analysis
+          - data_research
+          - visualization
+
+# ---------------------------------------------------------------------------
+# Job 1 — Detect which modules have changed (skipped for workflow_dispatch;
+#          the Resolve-outputs step handles that case).
+# ---------------------------------------------------------------------------
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      modules: ${{ steps.result.outputs.modules }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Path filters — only on push / pull_request (not workflow_dispatch)
+      - name: Detect changed paths
+        id: paths
+        if: github.event_name != 'workflow_dispatch'
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            data_load:
+              - "src/data_load/**"
+              - "src/constants.py"
+              - "pyproject.toml"
+            data_quality_analysis:
+              - "src/data_quality_analysis/**"
+              - "src/data_load/**"
+              - "src/constants.py"
+              - "pyproject.toml"
+            data_research:
+              - "src/data_research/**"
+              - "src/data_load/**"
+              - "src/analysis.py"
+              - "src/processing.py"
+              - "src/constants.py"
+              - "pyproject.toml"
+            visualization:
+              - "src/visualization/**"
+              - "src/data_load/**"
+              - "src/analysis.py"
+              - "src/processing.py"
+              - "src/constants.py"
+              - "pyproject.toml"
+
+      # Build a JSON array of modules that need to run.
+      # For workflow_dispatch: honour the 'module' input (or 'all').
+      # For push/pull_request: include only modules flagged by paths-filter.
+      - name: Resolve outputs
+        id: result
+        shell: bash
+        run: |
+          EVENT="${{ github.event_name }}"
+          INPUT="${{ github.event.inputs.module }}"
+          modules=()
+
+          if [[ "$EVENT" == "workflow_dispatch" ]]; then
+            for mod in data_load data_quality_analysis data_research visualization; do
+              if [[ "$INPUT" == "all" || "$INPUT" == "$mod" ]]; then
+                modules+=("$mod")
+              fi
+            done
+          else
+            [[ "${{ steps.paths.outputs.data_load }}"             == "true" ]] && modules+=("data_load")
+            [[ "${{ steps.paths.outputs.data_quality_analysis }}" == "true" ]] && modules+=("data_quality_analysis")
+            [[ "${{ steps.paths.outputs.data_research }}"         == "true" ]] && modules+=("data_research")
+            [[ "${{ steps.paths.outputs.visualization }}"         == "true" ]] && modules+=("visualization")
+          fi
+
+          if [[ ${#modules[@]} -eq 0 ]]; then
+            echo 'modules=[]' >> "$GITHUB_OUTPUT"
+          else
+            json=$(printf ',"%s"' "${modules[@]}")
+            echo "modules=[${json:1}]" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ---------------------------------------------------------------------------
+  # Job 2 — Download the dataset once and upload it as a workflow artifact so
+  # every matrix cell in Job 3 can reuse the same file without re-downloading.
+  # (actions/cache cannot share a cache entry that was created in a parallel
+  # sibling job of the same run — each job would restore before any saves.)
+  # ---------------------------------------------------------------------------
+  download-dataset:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.modules != '[]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up uv + Python 3.12
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Install project dependencies
+        run: uv sync
+
+      - name: Download dataset
+        run: uv run -m src.data_load
+
+      - name: Upload raw dataset artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dataset-raw
+          path: data/raw
+          retention-days: 1
+
+  # ---------------------------------------------------------------------------
+  # Job 3 — Run only the modules flagged by Job 1 (dynamic matrix via fromJson).
+  # ---------------------------------------------------------------------------
+  run-modules:
+    needs: [detect-changes, download-dataset]
+    if: needs.detect-changes.outputs.modules != '[]'
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        module: ${{ fromJson(needs.detect-changes.outputs.modules) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Needed to detect changes across the entire history.
+          # Change to 2 for a faster checkout that still detects changes in the last commit.
+          fetch-depth: 0
+
+      - name: Set up uv + Python 3.12
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Install project dependencies
+        run: uv sync
+
+      - name: Download raw dataset artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dataset-raw
+          path: data/raw
+
+      - name: Run module — ${{ matrix.module }}
+        run: |
+          mkdir -p artifacts/${{ matrix.module }}
+          set +e
+          uv run -m src.${{ matrix.module }} \
+            > artifacts/${{ matrix.module }}/run.log 2>&1
+          status=$?
+          echo "Exit code: $status" >> artifacts/${{ matrix.module }}/run.log
+          exit $status
+
+      - name: Upload artifacts — ${{ matrix.module }}
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts-${{ matrix.module }}
+          path: artifacts/${{ matrix.module }}
