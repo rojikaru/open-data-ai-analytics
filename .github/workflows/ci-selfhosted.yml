@@ -1,0 +1,90 @@
+name: CI (self-hosted)
+
+# Triggered manually only — self-hosted runner may be offline at any time.
+on:
+  workflow_dispatch:
+    inputs:
+      module:
+        description: "Which module to run (or 'all')"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - data_load
+          - data_quality_analysis
+          - data_research
+          - visualization
+
+# ---------------------------------------------------------------------------
+# Runs the selected module(s) on a locally registered self-hosted runner.
+# The runner must have Python ≥ 3.12 and pip available on PATH.
+# Register at: Settings → Actions → Runners → New self-hosted runner
+# Recommended labels: self-hosted, linux
+# ---------------------------------------------------------------------------
+jobs:
+  # Job 1 — Resolve the workflow_dispatch input into a JSON array of modules.
+  resolve-modules:
+    runs-on: ubuntu-latest
+    outputs:
+      modules: ${{ steps.result.outputs.modules }}
+
+    steps:
+      - name: Build modules array
+        id: result
+        shell: bash
+        run: |
+          INPUT="${{ github.event.inputs.module }}"
+          modules=()
+          for mod in data_load data_quality_analysis data_research visualization; do
+            if [[ "$INPUT" == "all" || "$INPUT" == "$mod" ]]; then
+              modules+=("$mod")
+            fi
+          done
+          json=$(printf ',"%s"' "${modules[@]}")
+          echo "modules=[${json:1}]" >> "$GITHUB_OUTPUT"
+
+  # Job 2 — Run selected modules on the self-hosted runner.
+  run-local:
+    needs: resolve-modules
+    runs-on: [self-hosted, linux]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        module: ${{ fromJson(needs.resolve-modules.outputs.modules) }}
+
+    # Force headless matplotlib backend so the runner has no display dependency.
+    env:
+      MPLBACKEND: Agg
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show Python version (system)
+        run: python3 --version
+
+      # Install project deps using pip (uv may not be installed on self-hosted).
+      - name: Install project dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -e .
+
+      # Reuse any dataset already present on the runner's workspace.
+      - name: Run module — ${{ matrix.module }}
+        run: |
+          mkdir -p artifacts/${{ matrix.module }}
+          set +e
+          python3 -m src.${{ matrix.module }} \
+            > artifacts/${{ matrix.module }}/run.log 2>&1
+          status=$?
+          echo "Exit code: $status" >> artifacts/${{ matrix.module }}/run.log
+          exit $status
+
+      - name: Upload artifacts — ${{ matrix.module }}
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts-${{ matrix.module }}-selfhosted
+          path: artifacts/${{ matrix.module }}
