@@ -18,7 +18,7 @@ on:
 
 # ---------------------------------------------------------------------------
 # Runs the selected module(s) on a locally registered self-hosted runner.
-# The runner must have Python ≥ 3.12 and pip available on PATH.
+# The runner must have uv available on PATH (https://docs.astral.sh/uv/).
 # Register at: Settings → Actions → Runners → New self-hosted runner
 # Recommended labels: self-hosted, linux
 # ---------------------------------------------------------------------------
@@ -63,20 +63,17 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Show Python version (system)
-        run: python3 --version
+        run: uv run python --version
 
-      # Install project deps
       - name: Install project dependencies
-        run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install -e .
+        run: uv sync
 
       # Reuse any dataset already present on the runner's workspace.
       - name: Run module — ${{ matrix.module }}
         run: |
           mkdir -p artifacts/${{ matrix.module }}
           set +e
-          python3 -m src.${{ matrix.module }} \
+          uv run -m src.${{ matrix.module }} \
             > artifacts/${{ matrix.module }}/run.log 2>&1
           status=$?
           echo "Exit code: $status" >> artifacts/${{ matrix.module }}/run.log
