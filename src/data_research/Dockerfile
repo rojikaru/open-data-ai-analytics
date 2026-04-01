@@ -5,12 +5,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-RUN uv pip install --system \
-    matplotlib==3.10.8 \
-    polars==1.38.1 \
-    pyarrow==23.0.1 \
-    requests==2.32.5 \
-    seaborn==0.13.2
+RUN uv sync --frozen --no-dev --no-editable --locked --system
 
 COPY . ./src
 
