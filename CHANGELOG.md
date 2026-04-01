@@ -1,3 +1,10 @@
+## 0.4.1 (2026-04-01)
+
+### Fix
+
+- code smells in Dockerfiles and data manipulation
+- add sqlite create into pipeline
+
 ## 0.4.0 (2026-04-01)
 
 ### Feat
