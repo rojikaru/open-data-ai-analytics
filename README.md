@@ -85,6 +85,14 @@ After startup:
 - Web UI: [http://localhost:8000](http://localhost:8000)
 - Health endpoint: [http://localhost:8000/health](http://localhost:8000/health)
 
+### Ports
+
+- `8000/tcp` — web interface (`web` service).
+
+### Example CSV file
+
+- `data/raw/reestrtz2026/reestrtz01.01.2026.csv` (will be downloaded by `data_load` service on local run if not present).
+
 ### Data exchange strategy
 
 - `data_load` writes source data into SQLite DB (`db/app.db`) and artifacts (`artifacts/data_load`).

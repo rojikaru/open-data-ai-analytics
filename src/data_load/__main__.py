@@ -30,7 +30,7 @@ def main():
 
     print(f"Shape: {df.shape}")
     print(df.head())
-    df.head(1000).write_csv(os.path.join(out_dir, "sample.csv"))
+    df.write_csv(os.path.join(out_dir, "sample.csv"))
 
     inserted_rows = write_dataframe_to_sqlite(df, table_name=DB_TABLE, db_path=DB_PATH)
 
