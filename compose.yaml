@@ -1,0 +1,98 @@
+services:
+  data_load:
+    build:
+      context: ./src
+      dockerfile: data_load/Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - raw_data:/app/data/raw
+      - db_data:/app/db
+      - artifacts_data:/app/artifacts
+    networks:
+      - analytics_net
+
+  data_quality_analysis:
+    build:
+      context: ./src
+      dockerfile: data_quality_analysis/Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - db_data:/app/db
+      - artifacts_data:/app/artifacts
+    depends_on:
+      data_load:
+        condition: service_completed_successfully
+    networks:
+      - analytics_net
+
+  data_research:
+    build:
+      context: ./src
+      dockerfile: data_research/Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - db_data:/app/db
+      - artifacts_data:/app/artifacts
+    depends_on:
+      data_load:
+        condition: service_completed_successfully
+    networks:
+      - analytics_net
+
+  visualization:
+    build:
+      context: ./src
+      dockerfile: visualization/Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - db_data:/app/db
+      - artifacts_data:/app/artifacts
+    depends_on:
+      data_quality_analysis:
+        condition: service_completed_successfully
+      data_research:
+        condition: service_completed_successfully
+    networks:
+      - analytics_net
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - db_data:/app/db
+      - artifacts_data:/app/artifacts
+    depends_on:
+      visualization:
+        condition: service_completed_successfully
+    ports:
+      - "${WEB_PORT:-8000}:8000"
+    networks:
+      - analytics_net
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()",
+        ]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+networks:
+  analytics_net:
+    driver: bridge
+
+volumes:
+  raw_data:
+  db_data:
+  artifacts_data:
