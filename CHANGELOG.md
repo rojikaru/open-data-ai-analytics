@@ -1,3 +1,18 @@
+## 0.4.0 (2026-04-01)
+
+### Feat
+
+- add web console
+- add sqlite facade
+- **ci**: configure self-host runner
+- **ci**: configure cloud runner
+- split up project execution steps
+
+### Fix
+
+- switch self-host CI to uv
+- **ci**: node.js 20 deprecation in actions/checkout
+
 ## 0.3.0 (2026-03-11)
 
 ### Feat
