@@ -10,6 +10,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 ARTIFACTS_ROOT = Path(os.getenv("ARTIFACTS_ROOT", "/app/artifacts"))
+ARTIFACTS_ROOT.mkdir(parents=True, exist_ok=True)
+
 DB_PATH = Path(os.getenv("DB_PATH", "/app/db/app.db"))
 DB_TABLE = os.getenv("DB_TABLE", "vehicles")
 

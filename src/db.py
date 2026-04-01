@@ -66,11 +66,11 @@ def write_dataframe_to_sqlite(
             f'INSERT INTO "{table_name}" ({quoted_columns}) VALUES ({placeholders})'
         )
 
-        rows = [tuple(row) for row in df.iter_rows()]
-        cur.executemany(insert_sql, rows)
+        rows_iter = (tuple(row) for row in df.iter_rows())
+        cur.executemany(insert_sql, rows_iter)
         conn.commit()
 
-        return len(rows)
+        return df.height
     finally:
         conn.close()
 

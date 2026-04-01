@@ -5,10 +5,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-RUN uv pip install --system \
-    fastapi==0.116.1 \
-    jinja2==3.1.6 \
-    uvicorn==0.35.0
+RUN uv sync --frozen --no-dev --no-editable --locked --system
 
 COPY . ./web
 

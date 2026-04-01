@@ -9,6 +9,7 @@ from src.constants import (
     DB_TABLE,
     CSV_SEPARATOR,
     CSV_QUOTE_CHAR,
+    DATA_LOAD_SAMPLE_SIZE,
 )
 from src.data_load import load_data
 from src.db import write_dataframe_to_sqlite
@@ -30,7 +31,7 @@ def main():
 
     print(f"Shape: {df.shape}")
     print(df.head())
-    df.write_csv(os.path.join(out_dir, "sample.csv"))
+    df.head(DATA_LOAD_SAMPLE_SIZE).write_csv(os.path.join(out_dir, "sample.csv"))
 
     inserted_rows = write_dataframe_to_sqlite(df, table_name=DB_TABLE, db_path=DB_PATH)
 
