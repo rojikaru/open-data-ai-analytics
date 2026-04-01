@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Open Data AI Analytics</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+</head>
+
+<body>
+    <header class="hero">
+        <h1>Open Data AI Analytics</h1>
+        <p>{{ project_description }}</p>
+    </header>
+
+    <main class="layout">
+        <section class="card">
+            <h2>Ingestion</h2>
+            {% if ingestion_summary %}
+            <pre>{{ ingestion_summary | tojson(indent=2) }}</pre>
+            {% else %}
+            <p>No ingestion summary available.</p>
+            {% endif %}
+
+            <h3>Loaded Data Preview (CSV sample)</h3>
+            {% if sample_data %}
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            {% for key in sample_data[0].keys() %}
+                            <th>{{ key }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in sample_data %}
+                        <tr>
+                            {% for value in row.values() %}
+                            <td>{{ value }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p>Sample CSV preview not available.</p>
+            {% endif %}
+        </section>
+
+        <section class="card">
+            <h2>Database Preview</h2>
+            {% if db_rows_preview %}
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            {% for key in db_rows_preview[0].keys() %}
+                            <th>{{ key }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in db_rows_preview %}
+                        <tr>
+                            {% for value in row.values() %}
+                            <td>{{ value }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p>DB is not populated yet.</p>
+            {% endif %}
+        </section>
+
+        <section class="card">
+            <h2>Data Quality</h2>
+            {% if quality_summary %}
+            <pre>{{ quality_summary | tojson(indent=2) }}</pre>
+            {% else %}
+            <p>Quality summary not available.</p>
+            {% endif %}
+
+            <h3>Null Counts Preview</h3>
+            {% if null_counts_preview %}
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            {% for key in null_counts_preview[0].keys() %}
+                            <th>{{ key }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in null_counts_preview %}
+                        <tr>
+                            {% for value in row.values() %}
+                            <td>{{ value }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p>Null counts report not available.</p>
+            {% endif %}
+        </section>
+
+        <section class="card">
+            <h2>Research Results</h2>
+            {% if research_summary %}
+            <pre>{{ research_summary | tojson(indent=2) }}</pre>
+            {% endif %}
+            <p>{{ research_text }}</p>
+
+            <h3>Region Aggregation Preview</h3>
+            {% if research_regions_preview %}
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            {% for key in research_regions_preview[0].keys() %}
+                            <th>{{ key }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in research_regions_preview %}
+                        <tr>
+                            {% for value in row.values() %}
+                            <td>{{ value }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p>Region report is not available.</p>
+            {% endif %}
+        </section>
+
+        <section class="card wide">
+            <h2>Visualizations</h2>
+            <div class="plots">
+                {% for plot in plots %}
+                <article>
+                    <h3>{{ plot.title }}</h3>
+                    {% if plot.exists %}
+                    <img src="{{ plot.path }}" alt="{{ plot.title }}" />
+                    {% else %}
+                    <p>Plot not generated yet.</p>
+                    {% endif %}
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>
