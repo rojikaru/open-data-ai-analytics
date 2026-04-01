@@ -128,6 +128,12 @@ jobs:
           name: dataset-raw
           path: data/raw
           retention-days: 1
+      
+      - name: Upload SQLite database artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dataset-db
+          path: db
 
   # ---------------------------------------------------------------------------
   # Job 3 — Run only the modules flagged by Job 1 (dynamic matrix via fromJson).
@@ -164,6 +170,12 @@ jobs:
         with:
           name: dataset-raw
           path: data/raw
+
+      - name: Download SQLite database artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dataset-db
+          path: db
 
       - name: Run module — ${{ matrix.module }}
         run: |
