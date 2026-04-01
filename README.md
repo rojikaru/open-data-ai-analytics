@@ -50,6 +50,75 @@ You can run the main analysis script using:
 uv run -m src.main
 ```
 
+## Docker Workspace Run
+
+The project includes a multi-container setup to run all modules in one local Docker workspace.
+
+### Services
+
+- `data_load`: downloads CSV, creates SQLite table, imports records.
+- `data_quality_analysis`: computes missing values, duplicates and basic validity checks.
+- `data_research`: computes basic statistics and research summaries.
+- `visualization`: generates at least two plots.
+- `web`: FastAPI + Jinja2 interface for data, reports and visualizations.
+
+### Files added for containerization
+
+- `compose.yaml`
+- `src/data_load/Dockerfile`
+- `src/data_quality_analysis/Dockerfile`
+- `src/data_research/Dockerfile`
+- `src/visualization/Dockerfile`
+- `web/Dockerfile`
+- `.env`
+
+### One-command startup
+
+Configuration template is available in `.env.example`.
+
+```bash
+docker compose up --build
+```
+
+After startup:
+
+- Web UI: [http://localhost:8000](http://localhost:8000)
+- Health endpoint: [http://localhost:8000/health](http://localhost:8000/health)
+
+### Data exchange strategy
+
+- `data_load` writes source data into SQLite DB (`db/app.db`) and artifacts (`artifacts/data_load`).
+- Analysis, research and visualization services read from SQLite and write their outputs into shared artifacts.
+- The web service reads both SQLite and generated artifacts.
+
+### Volumes and network
+
+- `raw_data` volume: downloaded CSV files.
+- `db_data` volume: SQLite database file.
+- `artifacts_data` volume: reports and plots.
+- `analytics_net` bridge network for all services.
+
+### Expected outputs
+
+- `artifacts/data_load/ingestion_summary.json`
+- `artifacts/data_quality_analysis/quality_summary.json`
+- `artifacts/data_quality_analysis/null_counts.csv`
+- `artifacts/data_research/research_summary.json`
+- `artifacts/visualization/ownership_by_region.png`
+- `artifacts/visualization/top_vehicle_types.png`
+
+### Stop and cleanup
+
+```bash
+docker compose down
+```
+
+To remove named volumes too:
+
+```bash
+docker compose down -v
+```
+
 ## References
 
 - [GitHub - github/gitignore: A collection of useful .gitignore templates](https://github.com/github/gitignore)
