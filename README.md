@@ -188,7 +188,7 @@ docker compose down -v
 | Public IP (static) | Externally reachable address |
 | Network Security Group | Opens TCP 22 (SSH) and TCP 8000 (web) |
 | Network Interface | Connects VM to network |
-| Linux VM (Standard_B1s, Ubuntu 22.04) | Runs Docker Compose pipeline |
+| Linux VM (Standard_B2ats_v2, Ubuntu 22.04) | Runs Docker Compose pipeline |
 
 ## References
 
