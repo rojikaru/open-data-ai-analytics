@@ -7,7 +7,7 @@ variable "location" {
 variable "vm_size" {
   description = "Azure VM SKU"
   type        = string
-  default     = "Standard_B2ats_v2"
+  default     = "Standard_B4ls_v2"
 }
 
 variable "admin_username" {
