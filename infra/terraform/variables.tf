@@ -1,19 +1,19 @@
-variable "location" {
-  description = "Azure region"
+variable "aws_region" {
+  description = "AWS region"
   type        = string
-  default     = "westeurope"
+  default     = "eu-central-1"
 }
 
-variable "vm_size" {
-  description = "Azure VM SKU"
+variable "instance_type" {
+  description = "EC2 instance type"
   type        = string
-  default     = "Standard_B4ls_v2"
+  default     = "t3a.small"
 }
 
 variable "admin_username" {
   description = "Linux admin username"
   type        = string
-  default     = "azureuser"
+  default     = "ubuntu"
 }
 
 variable "repo_url" {
@@ -28,6 +28,6 @@ variable "web_port" {
 }
 
 variable "admin_ssh_public_key" {
-  description = "RSA SSH public key content (paste output of: cat ~/.ssh/id_rsa.pub)"
+  description = "SSH public key content (paste output of: cat ~/.ssh/id_ed25519.pub)"
   type        = string
 }
