@@ -17,4 +17,5 @@ runcmd:
   - systemctl start docker
   - usermod -aG docker ${admin_username}
   - git clone ${repo_url} /opt/app
+  - cp /opt/app/.env.example /opt/app/.env
   - cd /opt/app && docker compose up -d
