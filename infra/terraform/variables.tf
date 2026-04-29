@@ -28,6 +28,6 @@ variable "web_port" {
 }
 
 variable "admin_ssh_public_key" {
-  description = "Ed25519 SSH public key content (paste output of: cat ~/.ssh/id_ed25519.pub)"
+  description = "RSA SSH public key content (paste output of: cat ~/.ssh/id_rsa.pub)"
   type        = string
 }
