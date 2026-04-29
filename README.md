@@ -150,7 +150,7 @@ docker compose down -v
    ```bash
    cat > terraform.tfvars <<EOF
    repo_url             = "https://github.com/rojikaru/open-data-ai-analytics"
-   admin_ssh_public_key = "$(cat ~/.ssh/id_ed25519.pub)"
+   admin_ssh_public_key = "$(cat ~/.ssh/id_rsa.pub)"
    EOF
    ```
 
