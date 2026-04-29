@@ -1,8 +1,8 @@
 services:
   data_load:
     build:
-      context: ./src
-      dockerfile: data_load/Dockerfile
+      context: .
+      dockerfile: src/data_load/Dockerfile
     env_file:
       - .env
     volumes:
@@ -14,8 +14,8 @@ services:
 
   data_quality_analysis:
     build:
-      context: ./src
-      dockerfile: data_quality_analysis/Dockerfile
+      context: ./
+      dockerfile: src/data_quality_analysis/Dockerfile
     env_file:
       - .env
     volumes:
@@ -29,8 +29,8 @@ services:
 
   data_research:
     build:
-      context: ./src
-      dockerfile: data_research/Dockerfile
+      context: ./
+      dockerfile: src/data_research/Dockerfile
     env_file:
       - .env
     volumes:
@@ -44,8 +44,8 @@ services:
 
   visualization:
     build:
-      context: ./src
-      dockerfile: visualization/Dockerfile
+      context: ./
+      dockerfile: src/visualization/Dockerfile
     env_file:
       - .env
     volumes:
@@ -61,8 +61,8 @@ services:
 
   web:
     build:
-      context: ./web
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: web/Dockerfile
     env_file:
       - .env
     volumes:
