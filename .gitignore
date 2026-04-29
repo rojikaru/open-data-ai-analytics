@@ -223,3 +223,11 @@ __marimo__/
 # Data files
 data/raw/
 data/processed/
+
+# Terraform
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+terraform.tfvars
+*.tfplan
