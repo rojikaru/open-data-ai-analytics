@@ -127,6 +127,69 @@ To remove named volumes too:
 docker compose down -v
 ```
 
+## Cloud Deployment (Azure via Terraform)
+
+### Prerequisites
+
+- An [Azure for Students](https://azure.microsoft.com/free/students/) account
+- The project pushed to a **public** GitHub repository
+
+### Steps
+
+1. Open [Azure Portal](https://portal.azure.com) and launch **Cloud Shell** (bash).
+
+2. Clone this repository in Cloud Shell:
+
+   ```bash
+   git clone https://github.com/rojikaru/open-data-ai-analytics
+   cd open-data-ai-analytics/infra/terraform
+   ```
+
+3. Create variables file:
+
+   ```bash
+   cat > terraform.tfvars <<EOF
+   repo_url             = "https://github.com/rojikaru/open-data-ai-analytics"
+   admin_ssh_public_key = "$(cat ~/.ssh/id_ed25519.pub)"
+   EOF
+   ```
+
+4. Initialize and apply:
+
+   ```bash
+   terraform init
+   terraform validate
+   terraform plan
+   terraform apply
+   ```
+
+5. After apply completes, copy the `app_url` output and open it in a browser.
+   The VM runs cloud-init on first boot — wait ~3–5 minutes for Docker to install and containers to start.
+
+6. Verify:
+
+   ```bash
+   curl $(terraform output -raw app_url)/health
+   # Expected: {"status":"ok"}
+   ```
+
+7. **After your demo, destroy all resources** to preserve your student credit:
+
+   ```bash
+   terraform destroy
+   ```
+
+### Azure Resources Created
+
+| Resource | Purpose |
+|---|---|
+| Resource Group | Container for all resources |
+| Virtual Network + Subnet | Private network (10.0.0.0/16) |
+| Public IP (static) | Externally reachable address |
+| Network Security Group | Opens TCP 22 (SSH) and TCP 8000 (web) |
+| Network Interface | Connects VM to network |
+| Linux VM (Standard_B1s, Ubuntu 22.04) | Runs Docker Compose pipeline |
+
 ## References
 
 - [GitHub - github/gitignore: A collection of useful .gitignore templates](https://github.com/github/gitignore)
