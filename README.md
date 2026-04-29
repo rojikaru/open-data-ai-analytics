@@ -127,34 +127,41 @@ To remove named volumes too:
 docker compose down -v
 ```
 
-## Cloud Deployment (Azure via Terraform)
+## Cloud Deployment (AWS via Terraform)
 
 ### Prerequisites
 
-- An [Azure for Students](https://azure.microsoft.com/free/students/) account
+- An AWS account with programmatic access
 - The project pushed to a **public** GitHub repository
 
 ### Steps
 
-1. Open [Azure Portal](https://portal.azure.com) and launch **Cloud Shell** (bash).
+1. Open [AWS CloudShell](https://console.aws.amazon.com/cloudshell) or use a local terminal with AWS CLI configured.
 
-2. Clone this repository in Cloud Shell:
+2. Install Terraform if not present:
+
+   ```bash
+   curl -fsSL https://releases.hashicorp.com/terraform/1.8.5/terraform_1.8.5_linux_amd64.zip -o tf.zip
+   unzip tf.zip && sudo mv terraform /usr/local/bin/
+   ```
+
+3. Clone this repository:
 
    ```bash
    git clone https://github.com/rojikaru/open-data-ai-analytics
    cd open-data-ai-analytics/infra/terraform
    ```
 
-3. Create variables file:
+4. Create variables file:
 
    ```bash
    cat > terraform.tfvars <<EOF
    repo_url             = "https://github.com/rojikaru/open-data-ai-analytics"
-   admin_ssh_public_key = "$(cat ~/.ssh/id_rsa.pub)"
+   admin_ssh_public_key = "$(cat ~/.ssh/id_ed25519.pub)"
    EOF
    ```
 
-4. Initialize and apply:
+5. Initialize and apply:
 
    ```bash
    terraform init
@@ -163,32 +170,30 @@ docker compose down -v
    terraform apply
    ```
 
-5. After apply completes, copy the `app_url` output and open it in a browser.
-   The VM runs cloud-init on first boot — wait ~3–5 minutes for Docker to install and containers to start.
+6. After apply completes, copy the `app_url` output and open it in a browser.
+   The VM runs cloud-init on first boot — wait ~5 minutes for Docker to install and containers to start.
 
-6. Verify:
+7. Verify:
 
    ```bash
    curl $(terraform output -raw app_url)/health
    # Expected: {"status":"ok"}
    ```
 
-7. **After your demo, destroy all resources** to preserve your student credit:
+8. **After your demo, destroy all resources** to avoid charges:
 
    ```bash
    terraform destroy
    ```
 
-### Azure Resources Created
+### AWS Resources Created
 
 | Resource | Purpose |
 |---|---|
-| Resource Group | Container for all resources |
-| Virtual Network + Subnet | Private network (10.0.0.0/16) |
-| Public IP (static) | Externally reachable address |
-| Network Security Group | Opens TCP 22 (SSH) and TCP 8000 (web) |
-| Network Interface | Connects VM to network |
-| Linux VM (Standard_B2ats_v2, Ubuntu 22.04) | Runs Docker Compose pipeline |
+| Key Pair | SSH public key for VM access |
+| Security Group | Opens TCP 22 (SSH) and TCP 8000 (web) |
+| EC2 Instance (t3.medium, Ubuntu 24.04) | Runs Docker Compose pipeline |
+| Elastic IP | Static public IP address |
 
 ## References
 
