@@ -111,10 +111,6 @@ resource "azurerm_linux_virtual_machine" "analytics" {
     version   = "latest"
   }
 
-  priority        = "Spot"
-  eviction_policy = "Deallocate"
-  max_bid_price   = -1
-
   custom_data = base64encode(templatefile("${path.module}/cloud-init.yaml.tpl", {
     repo_url       = var.repo_url
     admin_username = var.admin_username
