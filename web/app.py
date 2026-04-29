@@ -77,7 +77,6 @@ def index(request: Request):
     visualization_dir = ARTIFACTS_ROOT / "visualization"
 
     context = {
-        "request": request,
         "project_description": "Containerized analytics pipeline for open transport registry data.",
         "ingestion_summary": read_json_if_exists(data_load_dir / "ingestion_summary.json"),
         "sample_data": read_csv_preview(data_load_dir / "sample.csv"),
@@ -100,4 +99,4 @@ def index(request: Request):
             },
         ],
     }
-    return templates.TemplateResponse("index.html", context)
+    return templates.TemplateResponse(request, "index.html", context)
