@@ -1,12 +1,15 @@
-FROM ghcr.io/astral-sh/uv:python3.14-alpine
+FROM ghcr.io/astral-sh/uv:python3.12-alpine
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
+    UV_PROJECT_ENVIRONMENT=/usr/local \
     PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-RUN uv sync --frozen --no-dev --no-editable --locked --system
+COPY pyproject.toml uv.lock ./
 
-COPY . ./src
+RUN uv sync --no-dev --no-editable --locked
+
+COPY ./src ./src
 
 CMD ["python", "-m", "src.data_quality_analysis"]
