@@ -159,10 +159,6 @@ Ports 6443 and 30000–32767 are open in the AWS Security Group.
 
 ![Argo CD syncing](./argocd-progressing.png)
 
-### 9) Cluster after auto-sync — 2 replicas running
-
-![Scaled deployment](./scale-merged.png)
-
 ## Output of `git log --oneline --graph`
 
 ```plaintext
