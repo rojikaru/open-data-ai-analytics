@@ -34,6 +34,20 @@ resource "aws_security_group" "analytics" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    from_port   = var.grafana_port
+    to_port     = var.grafana_port
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = var.prometheus_port
+    to_port     = var.prometheus_port
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -64,9 +78,11 @@ resource "aws_instance" "analytics" {
   vpc_security_group_ids = [aws_security_group.analytics.id]
 
   user_data = templatefile("${path.module}/cloud-init.yaml.tpl", {
-    repo_url       = var.repo_url
-    admin_username = var.admin_username
-    web_port       = var.web_port
+    repo_url        = var.repo_url
+    admin_username  = var.admin_username
+    web_port        = var.web_port
+    grafana_port    = var.grafana_port
+    prometheus_port = var.prometheus_port
   })
 
   root_block_device {
