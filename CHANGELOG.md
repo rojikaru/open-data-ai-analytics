@@ -1,3 +1,28 @@
+## 0.5.0 (2026-04-30)
+
+### Feat
+
+- **infra**: replace Azure Terraform with AWS EC2
+- add web console
+- add sqlite facade
+
+### Fix
+
+- **aws**: bigger instance
+- use non-spot VM
+- set bigger vm variant
+- **web**: jinja2 template response new version contact
+- **deploy**: docker configuration & dependency resolution
+- **deploy**: missing env
+- **deploy**: docker installation during init
+- **deploy**: cloud init header
+- **terraform**: SKU offer
+- **terraform**: ubuntu offer
+- **terraform**: switch from ED25519 to RSA keys
+- **terraform**: track lockfile for reproducible deployments
+- code smells in Dockerfiles and data manipulation
+- add sqlite create into pipeline
+
 ## 0.4.1 (2026-04-01)
 
 ### Fix
