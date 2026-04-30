@@ -31,3 +31,15 @@ variable "admin_ssh_public_key" {
   description = "SSH public key content (paste output of: cat ~/.ssh/id_ed25519.pub)"
   type        = string
 }
+
+variable "grafana_port" {
+  description = "Port Grafana listens on"
+  type        = number
+  default     = 3000
+}
+
+variable "prometheus_port" {
+  description = "Port Prometheus listens on"
+  type        = number
+  default     = 9090
+}
