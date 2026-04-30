@@ -19,3 +19,4 @@ runcmd:
   - git clone ${repo_url} /opt/app
   - cp /opt/app/.env.example /opt/app/.env
   - cd /opt/app && docker compose up -d
+  - docker compose -f /opt/app/monitoring/docker-compose.monitoring.yml up -d
