@@ -2,12 +2,14 @@ import csv
 import json
 import os
 import sqlite3
+import time
 from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from prometheus_client import Counter, Histogram, make_asgi_app
 
 ARTIFACTS_ROOT = Path(os.getenv("ARTIFACTS_ROOT", "/app/artifacts"))
 ARTIFACTS_ROOT.mkdir(parents=True, exist_ok=True)
@@ -15,9 +17,21 @@ ARTIFACTS_ROOT.mkdir(parents=True, exist_ok=True)
 DB_PATH = Path(os.getenv("DB_PATH", "/app/db/app.db"))
 DB_TABLE = os.getenv("DB_TABLE", "vehicles")
 
+REQUEST_COUNT = Counter(
+    "http_requests_total",
+    "Total HTTP requests",
+    ["method", "endpoint", "status"],
+)
+REQUEST_LATENCY = Histogram(
+    "http_request_duration_seconds",
+    "HTTP request latency in seconds",
+    ["endpoint"],
+)
+
 app = FastAPI(title="Open Data AI Analytics")
 app.mount("/static", StaticFiles(directory="web/static"), name="static")
 app.mount("/artifacts", StaticFiles(directory=str(ARTIFACTS_ROOT)), name="artifacts")
+app.mount("/metrics", make_asgi_app())
 templates = Jinja2Templates(directory="web/templates")
 
 
@@ -71,6 +85,7 @@ def health() -> dict:
 
 @app.get("/", response_class=HTMLResponse)
 def index(request: Request):
+    t0 = time.perf_counter()
     data_load_dir = ARTIFACTS_ROOT / "data_load"
     quality_dir = ARTIFACTS_ROOT / "data_quality_analysis"
     research_dir = ARTIFACTS_ROOT / "data_research"
@@ -99,4 +114,9 @@ def index(request: Request):
             },
         ],
     }
-    return templates.TemplateResponse(request, "index.html", context)
+
+    response = templates.TemplateResponse(request, "index.html", context)
+    REQUEST_LATENCY.labels(endpoint="/").observe(time.perf_counter() - t0)
+    REQUEST_COUNT.labels(method="GET", endpoint="/", status=200).inc()
+
+    return response
