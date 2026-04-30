@@ -1,3 +1,18 @@
+## 0.6.0 (2026-04-30)
+
+### Feat
+
+- **monitoring**: define monitoring compose cluster
+- **monitoring**: define grafana dashboards
+- **monitoring**: define prometheus targets
+- **monitoring**: set up prometheus client for perf logs
+
+### Fix
+
+- **monitoring**: grafana datasource
+- **monitoring**: grafana datasource
+- **aws**: bigger instance
+
 ## 0.5.0 (2026-04-30)
 
 ### Feat
