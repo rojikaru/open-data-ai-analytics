@@ -27,7 +27,7 @@
 
 A dedicated `monitoring/` directory was added to the repository:
 
-```
+```plaintext
 monitoring/
 ├── prometheus/
 │   └── prometheus.yml
@@ -44,7 +44,7 @@ monitoring/
 `docker-compose.monitoring.yml` defines four services:
 
 | Service | Image | Purpose |
-|---|---|---|
+| --- | --- | --- |
 | `prometheus` | `prom/prometheus` | Scrapes and stores metrics |
 | `grafana` | `grafana/grafana` | Visualisation and dashboards |
 | `node-exporter` | `prom/node-exporter` | Exposes Linux host metrics |
@@ -73,7 +73,7 @@ All intervals are 15 s. The `web` job uses `metrics_path: /metrics` and targets 
 **Dashboard** (`dashboards/analytics.json`): five panels are provisioned automatically:
 
 | Panel | Query |
-|---|---|
+| --- | --- |
 | CPU Usage | `1 - avg(rate(node_cpu_seconds_total{mode="idle"}[2m]))` |
 | Memory Usage | `node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes` |
 | Running Containers | `count(count by (name) (container_last_seen{name!=""}))` |
