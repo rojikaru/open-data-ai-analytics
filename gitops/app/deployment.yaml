@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics
+  namespace: analytics
+  labels:
+    app: analytics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analytics
+  template:
+    metadata:
+      labels:
+        app: analytics
+    spec:
+      volumes:
+        - name: data
+          emptyDir: {}
+      initContainers:
+        - name: data-load
+          image: analytics/data_load:v1
+          imagePullPolicy: Never
+          envFrom:
+            - configMapRef:
+                name: analytics-config
+          volumeMounts:
+            - name: data
+              mountPath: /data
+        - name: data-quality-analysis
+          image: analytics/data_quality_analysis:v1
+          imagePullPolicy: Never
+          envFrom:
+            - configMapRef:
+                name: analytics-config
+          volumeMounts:
+            - name: data
+              mountPath: /data
+        - name: data-research
+          image: analytics/data_research:v1
+          imagePullPolicy: Never
+          envFrom:
+            - configMapRef:
+                name: analytics-config
+          volumeMounts:
+            - name: data
+              mountPath: /data
+        - name: visualization
+          image: analytics/visualization:v1
+          imagePullPolicy: Never
+          envFrom:
+            - configMapRef:
+                name: analytics-config
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      containers:
+        - name: web
+          image: analytics/web:v1
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: analytics-config
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
