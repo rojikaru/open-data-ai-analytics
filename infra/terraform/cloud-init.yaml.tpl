@@ -42,5 +42,13 @@ runcmd:
   - kubectl create namespace argocd --kubeconfig /etc/rancher/k3s/k3s.yaml
   - kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml --kubeconfig /etc/rancher/k3s/k3s.yaml
 
+  # Wait for Argo CD server to be ready
+  - kubectl wait --for=condition=Ready pod -l app.kubernetes.io/name=argocd-server -n argocd --timeout=300s --kubeconfig /etc/rancher/k3s/k3s.yaml
+
   # Expose Argo CD via NodePort
   - kubectl patch svc argocd-server -n argocd -p '{"spec":{"type":"NodePort","ports":[{"port":443,"targetPort":8080,"nodePort":30443}]}}' --kubeconfig /etc/rancher/k3s/k3s.yaml
+
+  # Bootstrap GitOps applications
+  - kubectl apply -f /opt/app/gitops/argocd/root-app.yaml -n argocd --kubeconfig /etc/rancher/k3s/k3s.yaml
+  - kubectl apply -f /opt/app/gitops/argocd/app.yaml -n argocd --kubeconfig /etc/rancher/k3s/k3s.yaml
+  - kubectl apply -f /opt/app/gitops/argocd/monitoring.yaml -n argocd --kubeconfig /etc/rancher/k3s/k3s.yaml
