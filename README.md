@@ -195,12 +195,12 @@ docker compose down -v
 
 ### AWS Resources Created
 
-| Resource | Purpose |
-|---|---|
-| Key Pair | SSH public key for VM access |
-| Security Group | Opens TCP 22 (SSH) and TCP 8000 (web) |
-| EC2 Instance (t3.medium, Ubuntu 24.04) | Runs Docker Compose pipeline |
-| Elastic IP | Static public IP address |
+| Resource                               | Purpose                               |
+| -------------------------------------- | ------------------------------------- |
+| Key Pair                               | SSH public key for VM access          |
+| Security Group                         | Opens TCP 22 (SSH) and TCP 8000 (web) |
+| EC2 Instance (t3.medium, Ubuntu 24.04) | Runs Docker Compose pipeline          |
+| Elastic IP                             | Static public IP address              |
 
 ## References
 
