@@ -127,37 +127,37 @@ Ports 6443 and 30000–32767 are open in the AWS Security Group.
 
 ## Screenshots
 
-### 1) Argo CD UI — applications registered
+### 1) Successful Terraform Deployment
+
+![Deployment](./deployment.png)
+
+### 2) Argo CD UI — applications registered
 
 ![Argo CD applications](./argocd.png)
-
-### 2) Argo CD — sync in progress
-
-![Argo CD syncing](./argocd-progressing.png)
 
 ### 3) Argo CD — all applications Synced and Healthy
 
 ![Argo CD success](./argocd-success.png)
 
-### 4) Web application running
+### 3) Web application running
 
 ![Web application](./web.png)
 
-### 5) Kubernetes Deployment resource graph
-
-![Deployment](./deployment.png)
-
-### 6) Prometheus targets — analytics service UP
+### 5) Prometheus targets — analytics service UP
 
 ![Prometheus](./prometheus.png)
 
-### 7) Grafana dashboard with live metrics
+### 6) Grafana dashboard with live metrics
 
 ![Grafana](./grafana.png)
 
-### 8) Auto-sync demo — scaling to 2 replicas
+### 7) Auto-sync demo — scaling to 2 replicas
 
 ![Scaling change](./changes-scale.png)
+
+### 8) Argo CD — sync in progress
+
+![Argo CD syncing](./argocd-progressing.png)
 
 ### 9) Cluster after auto-sync — 2 replicas running
 
