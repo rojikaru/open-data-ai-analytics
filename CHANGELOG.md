@@ -1,3 +1,20 @@
+## 0.7.0 (2026-04-30)
+
+### Feat
+
+- **deploy**: scale web container
+- **gitops**: add argocd k8s spec
+- **gitops**: add monitoring services k8s spec
+- **gitops**: add application k8s spec
+
+### Fix
+
+- **deploy**: await for Argo to be ready, then deploy apps in sequence
+
+### Refactor
+
+- **docs**: monitoring report markdown lint warnings
+
 ## 0.6.0 (2026-04-30)
 
 ### Feat
