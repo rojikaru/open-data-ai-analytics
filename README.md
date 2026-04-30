@@ -170,6 +170,13 @@ docker compose down -v
    terraform apply
    ```
 
+   Hint: while it's deploying, you can connect via SSH (outputted after apply) to watch the cloud-init logs in real time:
+
+   ```bash
+   ssh ubuntu@<instance_public_ip>
+   watch -n 0.5 "cat /var/log/cloud-init-output.log | tail -n 20"
+   ```
+
 6. After apply completes, copy the `app_url` output and open it in a browser.
    The VM runs cloud-init on first boot — wait ~5 minutes for Docker to install and containers to start.
 
